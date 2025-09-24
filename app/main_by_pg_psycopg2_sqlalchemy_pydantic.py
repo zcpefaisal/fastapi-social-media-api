@@ -1,5 +1,3 @@
-# Python FastAPI Development - Comprehensive Course for Beginners
-# https://www.youtube.com/watch?v=0sOvCWFmrtA
 # FastAPI
 # PostgreSql -> Database
 # Pydantic -> widely used data validation library for Python
@@ -35,17 +33,6 @@ models.Base.metadata.create_all(bind=engine)
 @app.get("/testalchemy")
 def testalchemy(db: Session = Depends(get_db)):
     return {"status": "success"}
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,6 +1,6 @@
 # pydantic model for validation request
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 class PostBase(BaseModel):
     title: str
@@ -25,3 +25,19 @@ class PostResponse(PostBase):
     # but pidantic work with dictionary dict, thats why need to active the orm mode for validation
     class Config:
         from_attributes = True
+
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    is_active: bool = True
+
+    class Config:
+        from_arrtibutes = True
+
+
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    is_active: bool
