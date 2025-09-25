@@ -41,3 +41,8 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     is_active: bool
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
