@@ -13,9 +13,9 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.PostResponse])
-def get_all_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+def get_all_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user), limit: int = 10, page: int = 0, search: str = ""):
     # "sqlalchemy" style with ORM
-    posts = db.query(models.Post).all()
+    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(page).all()
     return posts
 
 
@@ -28,7 +28,8 @@ def create_posts(post: schemas.PostCreate, db:Session = Depends(get_db), current
     # "sqlalchemy" style with ORM
     # new_post = models.Post(title=post.title, content=post.content)  #style-1
     # print(current_user)
-    new_post = models.Post(**post.dict()) #style-2 
+    new_post = models.Post(user_id = current_user.id, **post.dict()) #style-2 
+    # new_post.user_id = current_user.id
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -65,6 +66,9 @@ def update_posts(id: int, post: schemas.PostCreate, db: Session = Depends(get_db
     if get_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post not found for id {id}")
     
+    if get_post.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Unauthorized to perform the request")
+    
     updated_post.update(post.dict())
     db.commit()
     return updated_post.first()
@@ -74,10 +78,16 @@ def update_posts(id: int, post: schemas.PostCreate, db: Session = Depends(get_db
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_posts(id: int, db:Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # "sqlalchemy" style with ORM
-    deleted_post = db.query(models.Post).filter(models.Post.id == id)
-    if deleted_post.first() == None:
+    deleted_post_query = db.query(models.Post).filter(models.Post.id == id)
+    
+    deleted_post = deleted_post_query.first()
+    
+    if deleted_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post not found for id {id}")
     
-    deleted_post.delete()
+    if deleted_post.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Unauthorized to perform the request")
+    
+    deleted_post_query.delete()
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

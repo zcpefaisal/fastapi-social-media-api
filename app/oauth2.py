@@ -35,7 +35,7 @@ def verify_access_token(token: str, credentials_exception):
         token_data = schemas.TokenData(id=id)
     except InvalidTokenError:
         raise credentials_exception
-    print(token_data)
+
     return token_data
     
 def get_current_user(token: str = Depends(oauth2_schema), db: Session = Depends(database.get_db)):
