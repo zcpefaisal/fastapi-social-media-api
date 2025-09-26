@@ -1,6 +1,7 @@
 from typing import List # Optional
 from fastapi import Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
+from .. import oauth2
 
  # my created model, schemas etc 
 from .. import models, schemas
@@ -12,7 +13,7 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.PostResponse])
-def get_all_posts(db: Session = Depends(get_db)):
+def get_all_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # "sqlalchemy" style with ORM
     posts = db.query(models.Post).all()
     return posts
@@ -23,9 +24,10 @@ def get_all_posts(db: Session = Depends(get_db)):
 
 # standard process with detault status code response
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
-def create_posts(post: schemas.PostCreate, db:Session = Depends(get_db)):
+def create_posts(post: schemas.PostCreate, db:Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # "sqlalchemy" style with ORM
     # new_post = models.Post(title=post.title, content=post.content)  #style-1
+    # print(current_user)
     new_post = models.Post(**post.dict()) #style-2 
     db.add(new_post)
     db.commit()
@@ -38,13 +40,13 @@ def create_posts(post: schemas.PostCreate, db:Session = Depends(get_db)):
 # so follow the sequence
 
 @router.get("/latest", response_model=schemas.PostResponse)
-def get_latest_post(db:Session = Depends(get_db)):
+def get_latest_post(db:Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # "sqlalchemy" style with ORM
     post = db.query(models.Post).order_by(models.Post.id.desc()).first()
     return post
 
 @router.get("/{id}", response_model=schemas.PostResponse)
-def get_a_post(id: int, response: Response, db: Session=Depends(get_db)):
+def get_a_post(id: int, response: Response, db: Session=Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # "sqlalchemy" style with ORM
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
@@ -56,7 +58,7 @@ def get_a_post(id: int, response: Response, db: Session=Depends(get_db)):
 
 
 @router.put("/{id}", response_model=schemas.PostResponse)
-def update_posts(id: int, post: schemas.PostCreate, db: Session = Depends(get_db)):
+def update_posts(id: int, post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # "sqlalchemy" style with ORM
     updated_post = db.query(models.Post).filter(models.Post.id == id)
     get_post = updated_post.first()
@@ -70,7 +72,7 @@ def update_posts(id: int, post: schemas.PostCreate, db: Session = Depends(get_db
 
 # standard process with detault status code response
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_posts(id: int, db:Session = Depends(get_db)):
+def delete_posts(id: int, db:Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # "sqlalchemy" style with ORM
     deleted_post = db.query(models.Post).filter(models.Post.id == id)
     if deleted_post.first() == None:
