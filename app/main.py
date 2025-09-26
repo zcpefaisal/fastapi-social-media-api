@@ -5,18 +5,18 @@
 # SqlAlchemy -> open-source Python library that provides an SQL toolkit and ORM
 
 # import time
-from typing import List # Optional
-from fastapi import FastAPI, Response, status, HTTPException, Depends
+# from typing import List, Optional
+from fastapi import FastAPI # , Response, status, HTTPException, Depends
 # from fastapi.params import Body
 # from pydantic import BaseModel
 # from random import randrange
 # import psycopg2
 # from psycopg2.extras import RealDictCursor
 
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
  # my created model, schemas etc 
 from . import models
-from .database import engine, get_db # SessionLocal
+from .database import engine # get_db, SessionLocal
 from .routers import post, user, auth
 
 app = FastAPI()
