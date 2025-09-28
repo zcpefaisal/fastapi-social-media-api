@@ -1,6 +1,7 @@
 # pydantic model for validation request
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
+from pydantic.types import conint
 from typing import Optional
 
 class UserCreate(BaseModel):
@@ -63,3 +64,6 @@ class PostResponse(PostBase):
 
 
 
+class Vote(BaseModel):
+    post_id: int
+    dir: conint(le=1)
