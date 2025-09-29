@@ -1,6 +1,7 @@
 from typing import List # Optional
 from fastapi import Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from .. import oauth2
 
  # my created model, schemas etc 
@@ -12,11 +13,14 @@ router = APIRouter(
     tags=["Post"] # this will seperate as group in API documentation
 )
 
-@router.get("/", response_model=List[schemas.PostResponse])
+# @router.get("/", response_model=List[schemas.PostResponse])
+@router.get("/", response_model=List[schemas.PostWithVote])
 def get_all_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user), limit: int = 10, page: int = 0, search: str = ""):
     # "sqlalchemy" style with ORM
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(page).all()
-    return posts
+    # posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(page).all()
+
+    posts_withvote_count = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(page).all()
+    return posts_withvote_count
 
 
 # basic process 
