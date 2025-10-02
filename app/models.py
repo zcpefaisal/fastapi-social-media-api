@@ -24,6 +24,8 @@ class User(Base):
     password = Column(String, nullable=False)
     is_active = Column(Boolean, server_default="TRUE", nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'), nullable=False)
+    phone_number = Column(String)
+
 
 
 class Vote(Base):

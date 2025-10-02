@@ -15,8 +15,8 @@ from fastapi import FastAPI # , Response, status, HTTPException, Depends
 
 # from sqlalchemy.orm import Session
  # my created model, schemas etc 
-from . import models
-from .database import engine # get_db, SessionLocal
+# from . import models
+# from .database import engine # get_db, SessionLocal
 from .routers import post, user, auth, vote
 
 app = FastAPI()
@@ -24,7 +24,7 @@ app = FastAPI()
 # for use "SQLAlchemy" and "postgres"/"mysql"/"any other", Must install DB driver like "psycopg2" here we use
 # pip install SQLAlchemy==1.4
 
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 app.include_router(post.router)
 app.include_router(user.router)
